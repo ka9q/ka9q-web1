@@ -4262,6 +4262,7 @@ const bandOptions = {
 	{ label: "6M",  freq: 50100000 }
     ],
     broadcast: [
+        { label: "MF",  freq: 1120000 },
         { label: "120M", freq:2397500 },
         { label: "90M", freq: 3300000 },
         { label: "75M", freq: 3950000 },
@@ -4278,6 +4279,9 @@ const bandOptions = {
         { label: "11M", freq: 25850000 }
     ],
     utility: [
+        { label: "WWVB", freq: 60000 },
+        { label: "DCF77", freq: 77500 },
+        { label: "ALS162", freq: 162000 },
         { label: "WWV2.5", freq: 2500000 },
         { label: "WWV5", freq: 5000000 },
         { label: "WWV10", freq: 10000000 },
