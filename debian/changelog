@@ -1,3 +1,9 @@
+ka9q-web (2026.08.11-1-trixie1) trixie; urgency=medium
+
+  * Add MF, WWVB, DCF77 ALS162 presets
+
+ -- Phil Karn <karn@ka9q.net>  Mon, 10 Aug 2026 21:57:29 -0700
+
 ka9q-web (2026.07.15-2-trixie1) trixie; urgency=medium
 
   * round sample rates when converting to integer
