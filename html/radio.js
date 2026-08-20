@@ -389,6 +389,8 @@
       var if_power = 0;
       var ad_over = 0;
       var samples_since_over = 0;
+      var filter_drops = 0;
+      var output_errors = 0n;
       var noise_density_spectrum = 0;
       var noise_density_audio = 0;
       var blocks_since_last_poll = 0;
@@ -1206,22 +1208,14 @@ function applyQuickBW() {
           if(args[0]=='S') { // get our ssrc
             ssrc=parseInt(args[1]);
           }
-          // BFREQ: server-sent backend frequency in kHz (e.g., "BFREQ:10000.000")
+          // BFREQ: server-sent backend frequency in Hz (e.g., "BFREQ:470000.000")
           // BFREQ_FORCE: server-forced backend frequency update (UI should always apply)
           if ((args[0] === 'BFREQ' || args[0] === 'BFREQ_FORCE') && args.length > 1) {
             const f_raw = parseFloat(args[1]);
             if (Number.isFinite(f_raw)) {
-              // Detect whether server sent kHz (e.g., 14183.000) or Hz (e.g., 14183000)
-              let hz;
-              if (f_raw > 1000000) {
-                // large number — assume already in Hz
-                hz = Math.round(f_raw);
-                // console.debug('[radio.js] BFREQ text received (server) interpreted as Hz:', args[1], 'hz=', hz);
-              } else {
-                // assume kHz
-                hz = Math.round(f_raw * 1000);
-                // console.debug('[radio.js] BFREQ text received (server) interpreted as kHz:', args[1], 'hz=', hz);
-              }
+              // Backend (Channel.tune.freq) always reports Hz; a <1MHz/kHz
+              // heuristic here previously misinterpreted sub-1MHz Hz values as kHz.
+              const hz = Math.round(f_raw);
               backendFrequencyHz = hz;
               try {
                 const freqEl = document.getElementById('freq');
@@ -1714,6 +1708,14 @@ function applyQuickBW() {
                     break;
                   case 108: // SAMPLES_SINCE_OVER (variable-length big-endian uint64)
                     { let _v = 0n; for (let _k = 0; _k < l; _k++) _v = (_v << 8n) | BigInt(view.getUint8(i + _k)); samples_since_over = _v; }
+                    i += l;
+                    break;
+                  case 23: // OUTPUT_ERRORS (variable-length big-endian uint64)
+                    { let _v = 0n; for (let _k = 0; _k < l; _k++) _v = (_v << 8n) | BigInt(view.getUint8(i + _k)); output_errors = _v; }
+                    i += l;
+                    break;
+                  case 77: // FILTER_DROPS (variable-length big-endian uint32)
+                    { let _v = 0; for (let _k = 0; _k < l; _k++) _v = (_v * 256) + view.getUint8(i + _k); filter_drops = _v; }
                     i += l;
                     break;
                   case 97: // RF_ATTEN
@@ -3433,6 +3435,12 @@ function update_stats() {
   document.getElementById('adc_overs').innerHTML = "Overranges: " + ad_over.toLocaleString();
   let seconds_since_over = Number(samples_since_over) / Number(input_samprate);
   document.getElementById('adc_last_over').innerHTML = "Last overrange: " + formatUptimeDHMS(Number(seconds_since_over));
+  try {
+    document.getElementById('filter_drops').textContent = `Filter Drops: ${filter_drops.toLocaleString()}`;
+  } catch (e) {}
+  try {
+    document.getElementById('output_errors').textContent = `Output errors: ${output_errors.toString()}`;
+  } catch (e) {}
     document.getElementById('noise_bw').innerHTML = "Noise BW: " + noise_bw.toFixed(1) + " Hz " + (10*Math.log10(noise_bw/binWidthHz)).toFixed(1) + " dB";
   document.getElementById('uptime').innerHTML = "Uptime: " + formatUptimeDHMS(smp);
   document.getElementById('rf_gain').innerHTML = "RF Gain: " + rf_gain.toFixed(1) + " dB";
