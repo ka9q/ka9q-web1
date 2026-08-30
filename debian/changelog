@@ -1,3 +1,9 @@
+ka9q-web (2026.08.30-1-trixie1) trixie; urgency=medium
+
+  * commit 2732fafc5d988aaa0873c4efde8f8f8f013a3834
+
+ -- Phil Karn <karn@ka9q.net>  Sun, 30 Aug 2026 16:28:59 -0700
+
 ka9q-web (2026.08.21-1-trixie1) trixie; urgency=medium
 
   * commit 76bb72aafcfd289eaaecf5c3643889419121776f
